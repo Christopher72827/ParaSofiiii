@@ -22,6 +22,7 @@
         text-align: center;
         text-shadow: 0 0 10px red, 0 0 20px red, 0 0 40px red;
         transition: 0.5s;
+        cursor: pointer;
     }
 
     .guia {
@@ -59,10 +60,10 @@
 </head>
 <body>
 
-<div id="texto" class="texto">Presiona aquí</div>
-<div id="guia" class="guia">(Sigue presionando para continuar)</div>
+<div id="texto" class="texto">Haz click aquí</div>
+<div id="guia" class="guia">(Espera un momento… hay algo importante)</div>
 
-<!-- Música de Carla Morrison desde el segundo 94 -->
+<!-- Música YouTube -->
 <iframe 
     id="musicaYT"
     width="0" 
@@ -73,7 +74,7 @@
 </iframe>
 
 <script>
-let estado = 0;
+let estado = -1;
 let musicaIniciada = false;
 const texto = document.getElementById("texto");
 const guia = document.getElementById("guia");
@@ -99,17 +100,29 @@ function escribirTexto(textoNuevo, i = 0) {
 texto.addEventListener("click", (e) => {
     crearToque(e);
 
-    // iniciar música desde el primer click
-    if (!musicaIniciada) {
+    // PRIMER CLICK: advertencia de anuncios
+    if (estado === -1) {
+        texto.innerHTML = "Espera unos segundos...";
+        guia.innerHTML = "(Puede aparecer un anuncio, espera a que termine y vuelve a presionar)";
+
         musicaYT.src = "https://www.youtube.com/embed/q07Gd6Q-7dY?start=94&autoplay=1&loop=1&playlist=q07Gd6Q-7dY";
         musicaIniciada = true;
+
+        estado = 0;
+        return;
     }
 
-    if (estado < mensajes.length) {
-        escribirTexto(mensajes[estado]);
-        estado++;
+    // SEGUNDO CLICK: empieza experiencia
+    if (estado === 0) {
+        guia.innerHTML = "(Ahora sí… sigue presionando)";
+    }
+
+    if (estado > 0 && estado <= mensajes.length) {
+        escribirTexto(mensajes[estado - 1]);
         document.body.style.background = "radial-gradient(circle, #220000, #000000)";
-    } else if (estado === mensajes.length) {
+    }
+
+    if (estado === mensajes.length + 1) {
         guia.innerHTML = "...";
         texto.innerHTML = "";
 
@@ -119,10 +132,13 @@ texto.addEventListener("click", (e) => {
             document.body.style.background = "radial-gradient(circle, red, black)";
             lluviaFinal();
         }, 1000);
-        estado++;
-    } else {
+    }
+
+    if (estado > mensajes.length + 1) {
         guia.innerHTML = "Gracias por llegar hasta aquí ❤️";
     }
+
+    estado++;
 });
 
 function crearCorazon() {
